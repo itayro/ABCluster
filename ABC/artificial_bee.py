@@ -6,6 +6,13 @@ class ArtificialBee:
     """
         the general representation of a bee in the ABC
 
+        properties:
+            objective_function - the objective function we aim to optimize
+            n_trial - the current trial number
+            food_source - the input of the objective function
+            fitness_value - the value of the food source by the objective function
+            processing_opt - the options for generating new food source
+                            (either changing one dimension or all the dimensions)
     """
     INITIAL_NUM_OF_TRIALS = 0
 
@@ -22,6 +29,9 @@ class ArtificialBee:
     def get_fitness_value(self):
         return self.fitness_value
 
+    """
+        generating new food source (randomly) only if exhausted all the trials 
+    """
     def scout(self, max_trials):
         if self.n_trial >= max_trials:
             self.__scout()
@@ -33,6 +43,13 @@ class ArtificialBee:
                             ]
         self.n_trial = ArtificialBee.INITIAL_NUM_OF_TRIALS
 
+    """
+        choosing random phi between [-1.0,1.0] and calculating (either in one dimension or all):
+        z_i_j  = z_i_j + phi * (z_i_j - z_k_j)
+        
+        i,k - are indexes of different food sources
+        j - index of dimension
+    """
     def produce_new_food_source(self, other_food_source):
         if self.processing_opt == 'all_dimensions':
             return [z_i_j + random.uniform(-1.0, 1.0) * (z_i_j - z_k_j)

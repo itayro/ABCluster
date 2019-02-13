@@ -6,11 +6,19 @@ class EmployeeBee(ArtificialBee):
     def __init__(self, objective_function, processing_opt):
         ArtificialBee.__init__(self, objective_function, processing_opt)
 
+    """
+        producing new food source and if the solution is an improvement 
+        (currently minimizing the objective function value)
+        
+    """
     def search(self, other_food_source, max_tries):
         if self.n_trial >= max_tries:
             return
         alternative = ArtificialBee.produce_new_food_source(self, other_food_source)
 
+        """
+            if the alternative food source crossed the values of the objective function adapt them accordingly        
+        """
         for ind, val in enumerate(alternative):
             if val < self.objective_function.get_min_lim():
                 alternative[ind] = self.objective_function.get_min_lim()
@@ -34,6 +42,9 @@ class OnLookerBee(ArtificialBee):
     def __init__(self, objective_function, processing_opt):
         ArtificialBee.__init__(self, objective_function, processing_opt)
 
+    """
+        choose from all the food sources the other food source based on probability p (formula 5 in the article)
+    """
     def search(self, probs, food_sources, max_tries):
         if self.n_trial >= max_tries:
             return

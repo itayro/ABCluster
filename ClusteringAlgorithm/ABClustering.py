@@ -22,11 +22,16 @@ class ABClustering:
             self.employee_bees.append(EmployeeBee(self.objective_function, self.processing_opt))
             self.onlooker_bees.append(OnLookerBee(self.objective_function, self.processing_opt))
 
+    """
+        calculate the probability of each of the employee bees (based on formula 5 from the article)
+    """
     def __fit_evaluation(self):
         self._fit_values = map(lambda emp_bee: emp_bee.calc_fit(), self.employee_bees)
         sum_of_fits = sum(self._fit_values)
         self._fit_values = map(lambda fit_i: fit_i / sum_of_fits, self._fit_values)
-
+    """
+        choose random food source (index in the list of employee bees) different from the original one
+    """
     def __get_other_employee_source(self, current_ind):
         other_ind = current_ind
         while other_ind == current_ind:
@@ -40,7 +45,9 @@ class ABClustering:
 
     def __on_lookers_phase(self):
         map(lambda on_looker: on_looker.search(self.employee_bees, self._fit_values), self.onlooker_bees)
-
+    """
+        scout phase in both the employees and the onlookers 
+    """
     def __scouts_phase(self):
         map(lambda bee: ArtificialBee.scout(bee, self.max_trials), self.employee_bees + self.onlooker_bees)
 
