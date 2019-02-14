@@ -84,7 +84,7 @@ class SSE(ObjectiveFunction):
         self.distances = None
 
     def __set_centroids(self, instance):
-        centroids = np.reshape(instance, (self.n_centroids, self.dim))
+        centroids = np.reshape(instance, (self.n_centroids, self.dim // self.n_centroids))
 
         for ind, centroid in enumerate(centroids):
             self.centroids[ind] = centroid
@@ -105,7 +105,7 @@ class SSE(ObjectiveFunction):
             self.distances[min_centroid_id].append(min_norm)
 
     def __calc_sse(self):
-        return sum([np.power(distances, 2) for center_id, distances in self.distances.items()]) / len(self.data)
+        return sum([sum(np.power(distances, 2)) for center_id, distances in self.distances.items()]) / len(self.data)
 
     def evaluate(self, instance):
         self.clusters = dict(enumerate([[] for i in range(self.n_centroids)]))
@@ -116,3 +116,4 @@ class SSE(ObjectiveFunction):
         self.__assign_data_to_clusters()
 
         return self.__calc_sse()
+

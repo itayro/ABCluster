@@ -29,6 +29,9 @@ class ArtificialBee:
     def get_fitness_value(self):
         return self.fitness_value
 
+    def get_food_source(self):
+        return self.food_source
+
     """
         generating new food source (randomly) only if exhausted all the trials 
     """

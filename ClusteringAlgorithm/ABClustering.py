@@ -16,6 +16,7 @@ class ABClustering:
         self.onlooker_bees = []
         self._fit_values = []
         self.optimal_value_tracking = []
+        self.optimal_source = None
 
     def __initialize_colony(self):
         for _ in range(self.colony_size):
@@ -51,9 +52,32 @@ class ABClustering:
     def __scouts_phase(self):
         map(lambda bee: ArtificialBee.scout(bee, self.max_trials), self.employee_bees + self.onlooker_bees)
 
+    """
+        for purpose of graphs and etc.
+        :return list of all the best fitness value in each iteration
+    """
     def get_optimization_path(self):
-        return self.optimal_value_tracking
+        return [fit_val for source, fit_val in self.optimal_value_tracking]
 
+    """
+        for purpose of graphs and etc.
+        :return the food source that produced the best fitness score
+    """
+    def get_best_source(self):
+        abs_min = min(self.get_optimization_path())
+        for source, fit_val in self.optimal_value_tracking:
+            if abs_min == fit_val:
+                return source
+
+    """
+        main loop of the ABC algorithm 
+        1. initialize the bees
+        2. for every cycle:
+            2.1 run employee bees logic
+            2.2 run on looker bees logic
+            2.3 check for abandoned food sources (scout)
+            2.4 calc the best fitness score in this cycle & the food source that produced it    
+    """
     def optimize(self):
         self.__initialize_colony()
 
@@ -68,5 +92,7 @@ class ABClustering:
 
             max_fitness_in_cycle = min(map(lambda bee: bee.get_fitness_value(),
                                            self.employee_bees + self.onlooker_bees))
-            self.optimal_value_tracking.append(max_fitness_in_cycle)
-            # print("cycle no {0} \t->\tbest fitness: {1}".format(cycle_no, max_fitness_in_cycle))
+            max_fitness_source = \
+                list(filter(lambda bee: bee.get_fitness_value() == max_fitness_in_cycle,
+                            self.employee_bees + self.onlooker_bees))[0].get_food_source()
+            self.optimal_value_tracking.append((max_fitness_source, max_fitness_in_cycle))
