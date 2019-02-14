@@ -75,8 +75,44 @@ class SSE(ObjectiveFunction):
                     ||cluster_loc - point||^2
     """
 
-    def __init__(self, dim):
+    def __init__(self, dim, data, n_centroids):
         ObjectiveFunction.__init__(self, 0.0, 1.0, dim)
+        self.centroids = {}
+        self.data = data
+        self.n_centroids = n_centroids
+        self.clusters = None
+        self.distances = None
+
+    def __set_centroids(self, instance):
+        centroids = np.reshape(instance, (self.n_centroids, self.dim))
+
+        for ind, centroid in enumerate(centroids):
+            self.centroids[ind] = centroid
+
+    def __assign_data_to_clusters(self):
+        for data_point in self.data:
+            min_centroid_id = None
+            min_norm = np.inf
+
+            for centroid_id in self.centroids.keys():
+                norm = np.linalg.norm(data_point - self.centroids[centroid_id])
+
+                if min_centroid_id is None or norm < min_norm:
+                    min_norm = norm
+                    min_centroid_id = centroid_id
+
+            self.clusters[min_centroid_id].append(data_point)
+            self.distances[min_centroid_id].append(min_norm)
+
+    def __calc_sse(self):
+        return sum([np.power(distances, 2) for center_id, distances in self.distances.items()]) / len(self.data)
 
     def evaluate(self, instance):
-        pass
+        self.clusters = dict(enumerate([[] for i in range(self.n_centroids)]))
+        self.distances = dict(enumerate([[] for i in range(self.n_centroids)]))
+
+        self.__set_centroids(instance)
+
+        self.__assign_data_to_clusters()
+
+        return self.__calc_sse()
