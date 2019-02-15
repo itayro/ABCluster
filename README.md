@@ -2,10 +2,10 @@
 
 1. need to determine the form of measurement for the experiments:
    in the article they used CEP (classification error percentage) which is 100 x (misclassified examples) / (size of test set)
-   i think it will be nice to add: 
-              - time to run the algorithm
-              - check imbalanced data
-              - ...
+   i think it will be nice to add:
+   - time to run the algorithm
+   - check imbalanced data
+   - ...
 
 2. need to update the parameter options:
       - num_of_dimensions : instead of all or one, we should check how the algorithm works with varing number of dimensions when
