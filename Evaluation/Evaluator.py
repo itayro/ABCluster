@@ -80,15 +80,22 @@ for key in data:
             new_res = get_best_res(res, y_test, fitness=CEP)
             fitness_measures['accuracy'] += accuracy_score(y_test, new_res)
             fitness_measures['CEP'] += CEP(y_test, new_res)
-        for key in fitness_measures:
+        for key in ['accuracy', 'CEP']:
             fitness_measures[key] = fitness_measures[key]/N_SPLITS
-        print("{}'s accuracy = {}   CEP = {}".format(name, fitness_measures['accuracy'], -1*fitness_measures['CEP']))
-
+        m = model(n_clusters=len(list(set(y))))
+        t0 = time.time()
+        m_final_preds = m.fit_predict(X)
+        t1 = time.time()
+        fitness_measures['cluster_time'] = int(1000*(t1-t0))
+        print("{}'s accuracy = {}   CEP = {}    cluster_time = {}".format(name,
+                                                                          fitness_measures['accuracy'],
+                                                                          -1*fitness_measures['CEP'],
+                                                                          fitness_measures['cluster_time']))
         plt.subplot(1, 2, 1)
         plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=y, cmap=plt.cm.Set1,
                     edgecolor='k')
         plt.subplot(1, 2, 2)
-        plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=m.fit_predict(X), cmap=plt.cm.Set1,
+        plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=m_final_preds, cmap=plt.cm.Set1,
                     edgecolor='k')
 
         plt.show()
