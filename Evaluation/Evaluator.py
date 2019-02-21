@@ -18,6 +18,13 @@ from Evaluation.DataProcessor import *
 
 N_SPLITS = 10
 
+
+# CEP, as described in ABC article
+def CEP(y_test, preds):
+    number_of_misclassified = sum([1 if y != pred else 0 for y, pred in zip(y_test, preds)])
+    return -100*(number_of_misclassified/len(preds))
+
+
 # Check all translations of labels to real labels and returns the best one
 def get_best_res(res, reference, fitness=accuracy_score):
     labels = set(reference)
@@ -33,7 +40,7 @@ def get_best_res(res, reference, fitness=accuracy_score):
             curr_res[:] = [x if x != label_to_remove else label_to_insert for x in curr_res]
         if accuracy_score(curr_res, reference) > best_res_fitness:
             best_res = curr_res
-            best_res_fitness = accuracy_score(best_res, reference)
+            best_res_fitness = fitness(best_res, reference)
 
     return best_res
 
@@ -62,18 +69,20 @@ for key in data:
     # TODO: Visualize using PCA (above) & find good scoring method
     for name, model in models:
         kfold = model_selection.KFold(n_splits=N_SPLITS, random_state=7)
-        fitness_measures = {'accuracy': 0}
+        fitness_measures = {'accuracy': 0, 'CEP': 0}
         for train_index, test_index in kfold.split(principalComponents):
+            # X_train, X_test = X[train_index], X[test_index]
             X_train, X_test = principalComponents[train_index], principalComponents[test_index]
             y_train, y_test = y[train_index], y[test_index]
             m = model(n_clusters=len(list(set(y))))
             m.fit(X_train, y_train)
             res = m.predict(X_test)
-            new_res = get_best_res(res, y_test)
+            new_res = get_best_res(res, y_test, fitness=CEP)
             fitness_measures['accuracy'] += accuracy_score(y_test, new_res)
+            fitness_measures['CEP'] += CEP(y_test, new_res)
         for key in fitness_measures:
             fitness_measures[key] = fitness_measures[key]/N_SPLITS
-        print("{}'s accuracy = {}".format(name, fitness_measures['accuracy']))
+        print("{}'s accuracy = {}   CEP = {}".format(name, fitness_measures['accuracy'], -1*fitness_measures['CEP']))
 
         plt.subplot(1, 2, 1)
         plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=y, cmap=plt.cm.Set1,

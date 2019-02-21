@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import json
+import numpy as np
 import glob
 
 CONFIG_PATH = 'config.json'
@@ -21,7 +22,8 @@ class DataProcessor:
         with open(config_path) as f:
             self.data_info = json.load(f)
             for ds in self.data_info:
-                for key in ['name', 'address', 'categorical_related_cols', 'categorical_distinct_cols', 'missing_values']:
+                for key in ['name', 'address', 'categorical_related_cols', 'categorical_distinct_cols',
+                            'missing_values', 'to_remove_cols', 'target_col']:
                     if key not in ds:
                         raise Exception("{} not in one of the objects, revisit configure file".format(key))
 
@@ -39,7 +41,7 @@ class DataProcessor:
         df[col_name] = df[col_name].apply(lambda x: curr_values.index(x) if x in curr_values else x)
 
     # Read a single data set from uci to a local csv
-    def __single_uci_to_csv(self, address, name, delim=None):
+    def __single_uci_to_csv(self, address, name, target_col, delim=None):
         if os.path.exists("{}{}.csv".format(self.DATA_SETS_DIR, name)):
             print("a csv for {} already exists - skipped".format(name))
             return
@@ -47,6 +49,11 @@ class DataProcessor:
             df = pd.read_csv(address, header=None, delimiter='  ')
         else:
             df = pd.read_csv(address, header=None)
+        # Making sure the target column is last
+        if target_col != -1:
+            cols = list(df.columns)
+            cols = cols[:target_col] + cols[target_col+1:] + [cols[target_col]]
+            df = df[cols]
         df.to_csv("{}{}.csv".format(self.DATA_SETS_DIR, name), header=None, index=None)
 
     # Read all data sets from uci (using config file) to csv
@@ -55,17 +62,18 @@ class DataProcessor:
             os.makedirs(self.DATA_SETS_DIR)
         for ds in self.data_info:
             if 'delimeter' in ds:
-                self.__single_uci_to_csv(ds['address'], ds['name'], delim=ds['delimeter'])
+                self.__single_uci_to_csv(ds['address'], ds['name'], ds['target_col'], delim=ds['delimeter'])
             else:
-                self.__single_uci_to_csv(ds['address'], ds['name'])
+                self.__single_uci_to_csv(ds['address'], ds['name'], ds['target_col'])
 
     # Turn categorical features to numeric using one hot encoding for distinct and normally for related
-    def __manipulate_single_csv(self, name, categorical_related_cols, categorical_distinct_cols, missing):
+    def __manipulate_single_csv(self, name, categorical_related_cols, categorical_distinct_cols, missing, to_remove):
         df = pd.read_csv('{}{}.csv'.format(self.DATA_SETS_DIR, name), header=None)
         class_col = df.columns[-1]
 
         # if needed, drop rows with missing values
         if bool(missing):
+            df.replace('?', np.nan, inplace=True)
             df.dropna(inplace=True)
 
         for key in categorical_related_cols:
@@ -77,6 +85,10 @@ class DataProcessor:
         # TODO: find out how to work with string values in class columns
         self.turn_to_numeric_single_col(df, df.columns[-1])
 
+        # if needed, drop irrelevant cols (like id)
+        if len(to_remove) > 0:
+            df.drop(df.columns[to_remove], axis=1, inplace=True)
+
         df.to_csv('{}{}.csv'.format(self.MANIPULATED_DATA_SETS_DIR, name), header=None, index=None)
 
     # Turn categorical features to numeric using one hot encoding for distinct and normally for related - all data sets
@@ -87,7 +99,8 @@ class DataProcessor:
             self.__manipulate_single_csv(ds['name'],
                                          ds['categorical_related_cols'],
                                          ds['categorical_distinct_cols'],
-                                         ds['missing_values'])
+                                         ds['missing_values'],
+                                         ds['to_remove_cols'])
 
     # Read csv and return X,y
     def __get_X_y(self, name):
