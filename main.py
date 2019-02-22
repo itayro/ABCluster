@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
 from ClusteringAlgorithm.ABClustering import ABClustering
+from ClusteringAlgorithm.ABClassifier import ABClassifier
 from utils.ObjectiveFunction import *
-
-from sklearn.datasets import load_iris
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_iris, load_digits, load_breast_cancer, load_wine
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 
 def run():
@@ -59,6 +63,30 @@ def assign_centroid(centroids, point):
     return np.argmin(distances)
 
 
+
+def try_classify():
+    datasets = {
+        'iris': load_iris(),
+        'digits': load_digits(),
+        'wine': load_wine(),
+        'breast_cancer': load_breast_cancer(),
+
+    }
+    dataset = datasets['iris']
+    data = MinMaxScaler().fit_transform(dataset.data)
+    X_train, X_test, y_train, y_test = train_test_split(data, dataset.target, test_size=0.33,
+                                                        random_state=42, stratify=dataset.target)
+
+    classifier = ABClassifier()
+    classifier.fit(X_train, y_train.tolist())
+
+    labels = classifier.predict(X_test)
+
+    print(confusion_matrix(y_true=y_test, y_pred=labels))
+    print(accuracy_score(y_true=y_test, y_pred=labels))
+
+
 if __name__ == '__main__':
     # run()
-    clustering_with_abc()
+    # clustering_with_abc()
+    try_classify()

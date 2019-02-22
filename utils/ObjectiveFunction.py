@@ -39,6 +39,24 @@ class ObjectiveFunction(object):
         return self.dim
 
 
+@add_metaclass(ABCMeta)
+class ClusteringObjectiveFunction(ObjectiveFunction):
+    def __init__(self, min_lim, max_lim, dim):
+        ObjectiveFunction.__init__(self, min_lim, max_lim, dim)
+
+    @abstractmethod
+    def evaluate(self, instance):
+        pass
+
+    @abstractmethod
+    def map_centroid_to_labels(self, data, labels):
+        pass
+
+    @abstractmethod
+    def get_centroids(self):
+        pass
+
+
 class Sphere(ObjectiveFunction):
     """
         f(x1,..xD) = x1^2 + x2^2 + ... + xD^2
@@ -63,7 +81,7 @@ class Rosenbrock(ObjectiveFunction):
         return optimize.rosen(instance)
 
 
-class SSE(ObjectiveFunction):
+class SSE(ClusteringObjectiveFunction):
 
     """
         the objective function used for clustering (sum of square errors)
@@ -117,3 +135,27 @@ class SSE(ObjectiveFunction):
 
         return self.__calc_sse()
 
+    def map_centroid_to_labels(self, data, labels):
+        centroid_label = dict(enumerate([[] for i in range(self.n_centroids)]))
+
+        for data_point, label in zip(data, labels):
+            min_centroid_id = None
+            min_norm = np.inf
+
+            for centroid_id in self.centroids.keys():
+                norm = np.linalg.norm(data_point - self.centroids[centroid_id])
+
+                if min_centroid_id is None or norm < min_norm:
+                    min_norm = norm
+                    min_centroid_id = centroid_id
+
+            centroid_label[min_centroid_id].append(label)
+
+        centroid_to_label = {}
+        for centroid_id, centroid_labels in centroid_label.items():
+            centroid_to_label[centroid_id] = np.argmax(np.bincount(np.array(centroid_labels)))
+
+        return centroid_to_label
+
+    def get_centroids(self):
+        return self.centroids
