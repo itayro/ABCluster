@@ -1,6 +1,6 @@
 [
     {
-        "name": "iris",
+        "name": "Iris",
         "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data",
         "categorical_related_cols": {},
         "categorical_distinct_cols": [],
@@ -9,7 +9,26 @@
         "target_col": -1
     },
     {
-        "name": "breast_cancer",
+        "name": "Credit",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/australian/australian.dat",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "True",
+        "to_remove_cols": [],
+        "target_col": -1,
+        "delimeter": " "
+    },
+    {
+        "name": "Wine",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "False",
+        "to_remove_cols": [],
+        "target_col": 0
+    },
+    {
+        "name": "Cancer",
         "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data",
         "categorical_related_cols": {},
         "categorical_distinct_cols": [],
@@ -18,7 +37,7 @@
         "target_col": 1
     },
     {
-        "name": "breast_cancer_wisconsin",
+        "name": "Cancer-Int",
         "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data",
         "categorical_related_cols": {},
         "categorical_distinct_cols": [],
@@ -49,5 +68,14 @@
 		"missing_values": "False",
         "to_remove_cols": [],
         "target_col": -1
+    },
+    {
+        "name": "anuran calls",
+        "address": "Frogs_MFCCs.csv",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "False",
+        "to_remove_cols": [25,23,22],
+        "target_col": 24
     }
 ]

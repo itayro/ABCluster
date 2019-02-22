@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import model_selection
+from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 import itertools
 from sklearn.metrics import accuracy_score
@@ -32,13 +33,16 @@ def get_best_res(res, reference, fitness=accuracy_score):
 
     num_of_labels_in_res = len(res_label)
     best_res = list(res)
-    best_res_fitness = accuracy_score(best_res, reference)
+    best_res_fitness = fitness(best_res, reference)
     # Iterate over permutations of real labels
-    for per in list(itertools.permutations(labels)):
+    pers = list(itertools.permutations(labels))
+    for per in pers:
         curr_res = list(res)
-        for label_to_remove, label_to_insert in zip(res_label, per[:num_of_labels_in_res]):
-            curr_res[:] = [x if x != label_to_remove else label_to_insert for x in curr_res]
-        if accuracy_score(curr_res, reference) > best_res_fitness:
+        curr_replacement_dic = dict(zip(res_label, per[:num_of_labels_in_res]))
+        curr_res = [curr_replacement_dic[l] for l in curr_res]
+        # for label_to_remove, label_to_insert in curr_replacement_zip:
+        #     curr_res[:] = [x if x != label_to_remove else label_to_insert for x in curr_res]
+        if fitness(curr_res, reference) > best_res_fitness:
             best_res = curr_res
             best_res_fitness = fitness(best_res, reference)
 
@@ -66,43 +70,71 @@ for key in data:
     results = []
     names = []
 
-    # TODO: Visualize using PCA (above) & find good scoring method
     for name, model in models:
-        kfold = model_selection.KFold(n_splits=N_SPLITS, random_state=7)
+
+        #***************** Cross Validation *******************#
+
+        # fitness_measures = {'accuracy': 0, 'CEP': 0}
+        # kfold = model_selection.KFold(n_splits=N_SPLITS, random_state=7)
+        # for train_index, test_index in kfold.split(principalComponents):
+        #     # X_train, X_test = X[train_index], X[test_index]
+        #     X_train, X_test = principalComponents[train_index], principalComponents[test_index]
+        #     y_train, y_test = y[train_index], y[test_index]
+        #     m = model(n_clusters=len(list(set(y))))
+        #     m.fit(X_train, y_train)
+        #     res = m.predict(X_test)
+        #     new_res = get_best_res(res, y_test, fitness=CEP)
+        #     fitness_measures['accuracy'] += accuracy_score(y_test, new_res)
+        #     fitness_measures['CEP'] += CEP(y_test, new_res)
+        # for key in ['accuracy', 'CEP']:
+        #     fitness_measures[key] = fitness_measures[key]/N_SPLITS
+        #
+        # t0 = time.time()
+        # m_final_preds = m.fit_predict(X)
+        # t1 = time.time()
+        # fitness_measures['cluster_time'] = int(1000*(t1-t0))
+        # print("{}'s accuracy = {}   CEP = {}    cluster_time = {}".format(name,
+        #                                                                   fitness_measures['accuracy'],
+        #                                                                   -1*fitness_measures['CEP'],
+        #                                                                   fitness_measures['cluster_time']))
+        # plt.subplot(1, 2, 1)
+        # plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=y, cmap=plt.cm.Set1,
+        #             edgecolor='k')
+        # plt.subplot(1, 2, 2)
+        # plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=m_final_preds, cmap=plt.cm.Set1,
+        #             edgecolor='k')
+        #
+        # plt.show()
+
+        #******************** Train test split ********************#
+
         fitness_measures = {'accuracy': 0, 'CEP': 0}
-        for train_index, test_index in kfold.split(principalComponents):
-            # X_train, X_test = X[train_index], X[test_index]
-            X_train, X_test = principalComponents[train_index], principalComponents[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            m = model(n_clusters=len(list(set(y))))
-            m.fit(X_train, y_train)
-            res = m.predict(X_test)
-            new_res = get_best_res(res, y_test, fitness=CEP)
-            fitness_measures['accuracy'] += accuracy_score(y_test, new_res)
-            fitness_measures['CEP'] += CEP(y_test, new_res)
-        for key in ['accuracy', 'CEP']:
-            fitness_measures[key] = fitness_measures[key]/N_SPLITS
+        X_train, X_test, y_train, y_test = train_test_split(principalComponents, y, test_size=0.25, stratify=y)
         m = model(n_clusters=len(list(set(y))))
         t0 = time.time()
-        m_final_preds = m.fit_predict(X)
+        m.fit(X_train, y_train)
         t1 = time.time()
-        fitness_measures['cluster_time'] = int(1000*(t1-t0))
-        print("{}'s accuracy = {}   CEP = {}    cluster_time = {}".format(name,
-                                                                          fitness_measures['accuracy'],
-                                                                          -1*fitness_measures['CEP'],
-                                                                          fitness_measures['cluster_time']))
+        res = m.predict(X_test)
+        t2 = time.time()
+        new_res = get_best_res(res, y_test, fitness=CEP)
+        fitness_measures['accuracy'] += accuracy_score(y_test, new_res)
+        fitness_measures['CEP'] += CEP(y_test, new_res)
+        # t0 = time.time()
+        # m_final_preds = m.fit_predict(X)
+        # t1 = time.time()
+        fitness_measures['fit_time'] = int(1000 * (t1 - t0))
+        fitness_measures['cluster_time'] = int(1000 * (t2 - t1))
+        print("{}'s accuracy = {}   CEP = {}    cluster_time = {}   fit_time = {}"
+              .format(name,
+                      fitness_measures['accuracy'],
+                      -1 * fitness_measures['CEP'],
+                      fitness_measures['cluster_time'],
+                      fitness_measures['fit_time']))
         plt.subplot(1, 2, 1)
-        plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=y, cmap=plt.cm.Set1,
+        plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap=plt.cm.Set1,
                     edgecolor='k')
         plt.subplot(1, 2, 2)
-        plt.scatter(principalComponents[:, 0], principalComponents[:, 1], c=m_final_preds, cmap=plt.cm.Set1,
+        plt.scatter(X_test[:, 0], X_test[:, 1], c=res, cmap=plt.cm.Set1,
                     edgecolor='k')
 
         plt.show()
-
-        # cv_results = model_selection.cross_val_score(model(n_clusters=len(list(set(y)))), X, y, cv=kfold, scoring='accuracy')
-        # #cv_results = model_selection.cross_val_score(model(), X, y, cv=kfold, scoring='homogeneity_score')
-        # results.append(cv_results)
-        # names.append(name)
-        # msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-        # print(msg)

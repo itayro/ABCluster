@@ -46,7 +46,7 @@ class DataProcessor:
             print("a csv for {} already exists - skipped".format(name))
             return
         if delim is not None:
-            df = pd.read_csv(address, header=None, delimiter='  ')
+            df = pd.read_csv(address, header=None, delimiter=delim)
         else:
             df = pd.read_csv(address, header=None)
         # Making sure the target column is last
