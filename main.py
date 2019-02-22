@@ -77,7 +77,7 @@ def try_classify():
     X_train, X_test, y_train, y_test = train_test_split(data, dataset.target, test_size=0.33,
                                                         random_state=42, stratify=dataset.target)
 
-    classifier = ABClassifier(colony_size=60, employee_to_onlooker_ratio=0.75)
+    classifier = ABClassifier()
     classifier.fit(X_train, y_train.tolist())
 
     labels = classifier.predict(X_test)
