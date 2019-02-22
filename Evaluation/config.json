@@ -1,0 +1,53 @@
+[
+    {
+        "name": "iris",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "False",
+        "to_remove_cols": [],
+        "target_col": -1
+    },
+    {
+        "name": "breast_cancer",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "False",
+        "to_remove_cols": [0],
+        "target_col": 1
+    },
+    {
+        "name": "breast_cancer_wisconsin",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "True",
+        "to_remove_cols": [0],
+        "target_col": -1
+    },
+	{
+        "name": "user_knowledge_modeling",
+        "address": "Data_User_Modeling.csv",
+        "categorical_related_cols": {},
+        "categorical_distinct_cols": [],
+		"missing_values": "False",
+        "to_remove_cols": [],
+        "target_col": -1
+    },
+	{
+        "name": "nursery",
+        "address": "https://archive.ics.uci.edu/ml/machine-learning-databases/nursery/nursery.data",
+        "categorical_related_cols": {	
+										"0":["usual", "pretentious", "great_pret"], 
+										"1":["proper", "less_proper", "improper", "critical", "very_crit"],
+										"3": ["1","2","3","more"],
+										"4":["convenient", "less_conv", "critical"],
+										"6":["nonprob", "slightly_prob", "problematic"]
+									},
+        "categorical_distinct_cols": [2, 5, 7],
+		"missing_values": "False",
+        "to_remove_cols": [],
+        "target_col": -1
+    }
+]
