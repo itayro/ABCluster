@@ -4,9 +4,16 @@ import random
 
 
 class ABClustering:
-    def __init__(self, objective_function, colony_size=30, cycles=5000, max_trials=100, processing_opt='all_dimensions'):
+    @staticmethod
+    def __determine_colonies(colony_size, employee_to_onlooker_ratio):
+        employee_size = (colony_size * employee_to_onlooker_ratio) / (1 + employee_to_onlooker_ratio)
+        return int(round(employee_size)), colony_size - int(round(employee_size))
+
+    def __init__(self, objective_function, colony_size=30, cycles=5000, max_trials=100, processing_opt=None,
+                 employee_to_onlooker_ratio=1.0):
         self.objective_function = objective_function
-        self.colony_size = colony_size
+        self.employee_colony_size, self.onlooker_colony_size = \
+            ABClustering.__determine_colonies(colony_size, employee_to_onlooker_ratio)
         self.cycles = cycles
         self.max_trials = max_trials
         self.processing_opt = processing_opt
@@ -19,8 +26,9 @@ class ABClustering:
         self.optimal_source = None
 
     def __initialize_colony(self):
-        for _ in range(self.colony_size):
+        for _ in range(self.employee_colony_size):
             self.employee_bees.append(EmployeeBee(self.objective_function, self.processing_opt))
+        for _ in range(self.onlooker_colony_size):
             self.onlooker_bees.append(OnLookerBee(self.objective_function, self.processing_opt))
 
     """
@@ -36,7 +44,7 @@ class ABClustering:
     def __get_other_employee_source(self, current_ind):
         other_ind = current_ind
         while other_ind == current_ind:
-            other_ind = random.randint(0, self.colony_size - 1)
+            other_ind = random.randint(0, self.employee_colony_size - 1)
         return other_ind
 
     def __employees_phase(self):
@@ -96,3 +104,7 @@ class ABClustering:
                 list(filter(lambda bee: bee.get_fitness_value() == max_fitness_in_cycle,
                             self.employee_bees + self.onlooker_bees))[0].get_food_source()
             self.optimal_value_tracking.append((max_fitness_source, max_fitness_in_cycle))
+
+    def set_objective_function(self, objective_function):
+        self.objective_function = objective_function
+
