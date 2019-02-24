@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from ClusteringAlgorithm.ABClustering import ABClustering
 from ClusteringAlgorithm.ABClassifier import ABClassifier
 from utils.ObjectiveFunction import *
-import pandas as pd
 import numpy as np
 from sklearn.datasets import load_iris, load_digits, load_breast_cancer, load_wine
 from sklearn.preprocessing import MinMaxScaler
@@ -63,7 +62,6 @@ def assign_centroid(centroids, point):
     return np.argmin(distances)
 
 
-
 def try_classify():
     datasets = {
         'iris': load_iris(),
@@ -73,7 +71,8 @@ def try_classify():
 
     }
     dataset = datasets['iris']
-    data = MinMaxScaler().fit_transform(dataset.data)
+    # data = MinMaxScaler().fit_transform(dataset.data)
+    data = dataset.data
     X_train, X_test, y_train, y_test = train_test_split(data, dataset.target, test_size=0.33,
                                                         random_state=42, stratify=dataset.target)
 

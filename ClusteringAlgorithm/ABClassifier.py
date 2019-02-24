@@ -1,18 +1,21 @@
 from ClusteringAlgorithm.ABClustering import ABClustering
 from utils.ObjectiveFunction import SSE
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 class ABClassifier:
-    def __init__(self, colony_size=20, cycles=5000, max_trials=100,
+    def __init__(self, colony_size=40, cycles=5000, max_tries_employee=100, max_tries_onlooker=100,
                  processing_opt=None, employee_to_onlooker_ratio=1.0):
 
         self._cluster_algorithm = ABClustering(objective_function=None, colony_size=colony_size,
-                                               cycles=cycles, max_trials=max_trials,
+                                               cycles=cycles, max_tries_employee=max_tries_employee,
+                                               max_tries_onlooker=max_tries_onlooker,
                                                processing_opt=processing_opt,
                                                employee_to_onlooker_ratio=employee_to_onlooker_ratio)
         self._centroids_to_labels = {}
         self._objective_function = None
+        self._data_transformer = MinMaxScaler()
 
     """
         requirements:
@@ -21,6 +24,7 @@ class ABClassifier:
     """
     def fit(self, train_data, labels):
         print('start fit')
+        train_data = self._data_transformer.fit_transform(train_data)
         num_of_labels = len(set(labels))
         self._objective_function = SSE(train_data.shape[1] * num_of_labels,
                                        train_data.tolist(),
@@ -33,6 +37,7 @@ class ABClassifier:
 
     def predict(self, data_points):
         print('start predict')
+        data_points = self._data_transformer.fit_transform(data_points)
         centroids = self._objective_function.get_centroids()
         labels = []
         for data_point in data_points:

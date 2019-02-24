@@ -4,18 +4,20 @@ import random
 
 
 class ABClustering:
+
     @staticmethod
     def __determine_colonies(colony_size, employee_to_onlooker_ratio):
         employee_size = (colony_size * employee_to_onlooker_ratio) / (1 + employee_to_onlooker_ratio)
         return int(round(employee_size)), colony_size - int(round(employee_size))
 
-    def __init__(self, objective_function, colony_size=30, cycles=5000, max_trials=100, processing_opt=None,
-                 employee_to_onlooker_ratio=1.0):
+    def __init__(self, objective_function, colony_size=30, cycles=5000, max_tries_employee=100, max_tries_onlooker=100,
+                 processing_opt=None, employee_to_onlooker_ratio=1.0):
         self.objective_function = objective_function
         self.employee_colony_size, self.onlooker_colony_size = \
             ABClustering.__determine_colonies(colony_size, employee_to_onlooker_ratio)
         self.cycles = cycles
-        self.max_trials = max_trials
+        self.max_tries_employee = max_tries_employee
+        self.max_tries_onlooker = max_tries_onlooker
         self.processing_opt = processing_opt
 
         self.optimal_val = None
@@ -38,6 +40,7 @@ class ABClustering:
         self._fit_values = map(lambda emp_bee: emp_bee.calc_fit(), self.employee_bees)
         sum_of_fits = sum(self._fit_values)
         self._fit_values = map(lambda fit_i: fit_i / sum_of_fits, self._fit_values)
+
     """
         choose random food source (index in the list of employee bees) different from the original one
     """
@@ -50,15 +53,18 @@ class ABClustering:
     def __employees_phase(self):
         for ind, bee in enumerate(self.employee_bees):
             other_ind = self.__get_other_employee_source(ind)
-            self.employee_bees[ind].search(self.employee_bees[other_ind].get_food_source(), self.max_trials)
+            self.employee_bees[ind].search(self.employee_bees[other_ind].get_food_source(), self.max_tries_employee)
 
     def __on_lookers_phase(self):
-        map(lambda on_looker: on_looker.search(self.employee_bees, self._fit_values), self.onlooker_bees)
+        map(lambda on_looker: on_looker.search(self.employee_bees, self._fit_values, self.max_tries_onlooker),
+            self.onlooker_bees)
+
     """
         scout phase in both the employees and the onlookers 
     """
     def __scouts_phase(self):
-        map(lambda bee: ArtificialBee.scout(bee, self.max_trials), self.employee_bees + self.onlooker_bees)
+        map(lambda bee: ArtificialBee.scout(bee, self.max_tries_employee), self.employee_bees)
+        map(lambda bee: ArtificialBee.scout(bee, self.max_tries_onlooker), self.onlooker_bees)
 
     """
         for purpose of graphs and etc.
