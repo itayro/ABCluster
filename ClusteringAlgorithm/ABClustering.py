@@ -1,5 +1,5 @@
 from ABC.specific_bees import OnLookerBee, EmployeeBee
-from ABC.artificial_bee import ArtificialBee
+from ABC.bee import Bee
 import random
 
 
@@ -8,6 +8,8 @@ class ABClustering:
     @staticmethod
     def __determine_colonies(colony_size, employee_to_onlooker_ratio):
         employee_size = (colony_size * employee_to_onlooker_ratio) / (1 + employee_to_onlooker_ratio)
+        if int(round(employee_size)) <= 1 or int(round(employee_size)) >= colony_size:
+            raise ValueError('the colony size is too small (either the employees or the onlookers are less than 2)')
         return int(round(employee_size)), colony_size - int(round(employee_size))
 
     def __init__(self, objective_function, colony_size=30, cycles=5000, max_tries_employee=100, max_tries_onlooker=100,
@@ -63,8 +65,8 @@ class ABClustering:
         scout phase in both the employees and the onlookers 
     """
     def __scouts_phase(self):
-        map(lambda bee: ArtificialBee.scout(bee, self.max_tries_employee), self.employee_bees)
-        map(lambda bee: ArtificialBee.scout(bee, self.max_tries_onlooker), self.onlooker_bees)
+        map(lambda bee: Bee.scout(bee, self.max_tries_employee), self.employee_bees)
+        map(lambda bee: Bee.scout(bee, self.max_tries_onlooker), self.onlooker_bees)
 
     """
         for purpose of graphs and etc.

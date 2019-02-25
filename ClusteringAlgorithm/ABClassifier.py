@@ -1,5 +1,5 @@
 from ClusteringAlgorithm.ABClustering import ABClustering
-from utils.ObjectiveFunction import SSE
+from utils.ClusteringObjectiveFunction import SSE
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 

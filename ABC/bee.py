@@ -1,7 +1,7 @@
 import random
 
 
-class ArtificialBee:
+class Bee:
     """
         the general representation of a bee in the ABC
 
@@ -18,7 +18,7 @@ class ArtificialBee:
 
     def __init__(self, objective_function, processing_opt):
         self.objective_function = objective_function
-        self.n_trial = ArtificialBee.INITIAL_NUM_OF_TRIALS
+        self.n_trial = Bee.INITIAL_NUM_OF_TRIALS
         self.food_source = self.objective_function.random_sample()
         self.fitness_value = self.objective_function.evaluate(self.food_source)
         self.processing_opt = processing_opt
@@ -44,7 +44,7 @@ class ArtificialBee:
                                            self.objective_function.get_max_lim())
                             for _ in range(self.objective_function.get_dim())
                             ]
-        self.n_trial = ArtificialBee.INITIAL_NUM_OF_TRIALS
+        self.n_trial = Bee.INITIAL_NUM_OF_TRIALS
 
     """
         choosing random phi between [-1.0,1.0] and calculating (either in one dimension or all):

@@ -1,20 +1,21 @@
-from ABC.artificial_bee import ArtificialBee
+from ABC.bee import Bee
 import numpy as np
 
 
-class EmployeeBee(ArtificialBee):
+class EmployeeBee(Bee):
     def __init__(self, objective_function, processing_opt):
-        ArtificialBee.__init__(self, objective_function, processing_opt)
+        Bee.__init__(self, objective_function, processing_opt)
 
     """
         producing new food source and if the solution is an improvement 
         (currently minimizing the objective function value)
         
+        :return void
     """
     def search(self, other_food_source, max_tries):
         if self.n_trial >= max_tries:
             return
-        alternative = ArtificialBee.produce_new_food_source(self, other_food_source)
+        alternative = Bee.produce_new_food_source(self, other_food_source)
 
         """
             if the alternative food source crossed the values of the objective function adapt them accordingly        
@@ -32,24 +33,26 @@ class EmployeeBee(ArtificialBee):
         else:
             self.fitness_value = new_fitness
             self.food_source = alternative
-            self.n_trial = ArtificialBee.INITIAL_NUM_OF_TRIALS
+            self.n_trial = Bee.INITIAL_NUM_OF_TRIALS
 
     def get_food_source(self):
         return self.food_source
 
 
-class OnLookerBee(ArtificialBee):
+class OnLookerBee(Bee):
     def __init__(self, objective_function, processing_opt):
-        ArtificialBee.__init__(self, objective_function, processing_opt)
+        Bee.__init__(self, objective_function, processing_opt)
 
     """
         choose from all the food sources the other food source based on probability p (formula 5 in the article)
+        
+        :return void
     """
     def search(self, probs, food_sources, max_tries):
         if self.n_trial >= max_tries:
             return
         other_food_source = np.random.choice(food_sources, p=probs)
-        alternative = ArtificialBee.produce_new_food_source(self, other_food_source)
+        alternative = Bee.produce_new_food_source(self, other_food_source)
 
         for ind, val in enumerate(alternative):
             if val < self.objective_function.get_min_lim():
@@ -64,4 +67,4 @@ class OnLookerBee(ArtificialBee):
         else:
             self.fitness_value = new_fitness
             self.food_source = alternative
-            self.n_trial = ArtificialBee.INITIAL_NUM_OF_TRIALS
+            self.n_trial = Bee.INITIAL_NUM_OF_TRIALS
