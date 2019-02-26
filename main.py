@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 from ClusteringAlgorithm.ABClustering import ABClustering
 from ClusteringAlgorithm.ABClassifier import ABClassifier
-from utils.ObjectiveFunction import *
 from utils.ClusteringObjectiveFunction import *
 import numpy as np
+import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -12,9 +12,9 @@ import time
 
 
 """
-          plotting the points where the x & y axises are the second and forth features 
-          the left graph illustrates the clusters in the first round and the right graph illustrates
-          the clusters in the end of the ABC algorithm
+      plotting the points where the x & y axises are the second and forth features 
+      the left graph illustrates the clusters in the first round and the right graph illustrates
+      the clusters in the end of the ABC algorithm
 """
 
 
@@ -135,6 +135,20 @@ def plot_iris_testing_ratio_colony_sizes_time():
     plt.show()
 
 
+def clustering_illustration_abc():
+    data = MinMaxScaler().fit_transform(load_iris()['data'][:, [1, 3]])
+    objective_function1 = SSE(dim=6, n_centroids=3, data=data)
+    abc1 = ABClustering(objective_function=objective_function1, colony_size=30, cycles=300, max_tries_employee=100,
+                        max_tries_onlooker=100, processing_opt=None)
+
+    abc1.optimize()
+
+    d_s = {'cluster centers': [np.reshape(i, (3, 2)) for i, j in abc1.optimal_value_tracking],
+           'SSE': [j for i, j in abc1.optimal_value_tracking]}
+    pd.DataFrame.from_dict(d_s).to_csv('abc_illustration.csv')
+
+
 if __name__ == '__main__':
-    clustering_with_abc()
+    # clustering_with_abc()
     # plot_iris_testing_ratio_colony_sizes_time()
+    clustering_illustration_abc()
